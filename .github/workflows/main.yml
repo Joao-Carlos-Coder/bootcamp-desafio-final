@@ -1,0 +1,37 @@
+name: Treinar Modelo CVAE
+
+# Este workflow será acionado manualmente
+on:
+  workflow_dispatch:
+
+jobs:
+  training:
+    runs-on: ubuntu-latest # Usaremos uma máquina virtual Linux padrão
+
+    steps:
+      # Passo 1: Pega o seu código do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Passo 2: Configura o ambiente Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Mesma versão que usaríamos na AWS
+
+      # Passo 3: Instala todas as dependências do nosso arquivo requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Passo 4: Executa o nosso script de treinamento!
+      - name: Run training script
+        run: python training_script.py --epochs 5 # Usamos 5 épocas para ser mais rápido. Pode aumentar para 10.
+
+      # Passo 5: "Embala para viagem" o modelo treinado
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-cvae-model # Nome do pacote
+          path: model/model.pth   # O que está dentro do pacote (o arquivo do modelo!)
