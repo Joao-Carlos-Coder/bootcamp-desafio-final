@@ -332,58 +332,32 @@ def predict_fn(input_data, model):
 
 
 if __name__ == "__main__":
-    # load_dotenv()
     parser = argparse.ArgumentParser()
 
-    # Data and model checkpoints directories
-    parser.add_argument(
-        "--latent_dim",
-        type=int,
-        default=120,
-        metavar="N",
-        help="Latent dim for CVAE (default: 120)",
-    )
-    parser.add_argument(
-        "--batch-size",
-        type=int,
-        default=64,
-        metavar="N",
-        help="input batch size for training (default: 64)",
-    )
-    parser.add_argument(
-        "--test-batch-size",
-        type=int,
-        default=1000,
-        metavar="N",
-        help="input batch size for testing (default: 1000)",
-    )
-    parser.add_argument(
-        "--epochs",
-        type=int,
-        default=10,
-        metavar="N",
-        help="number of epochs to train (default: 10)",
-    )
-    parser.add_argument(
-        "--num-classes",
-        type=int,
-        default=10,
-        metavar="N",
-        help="number of classes (default: 10)",
-    )
-    parser.add_argument(
-        "--lr", type=float, default=0.01, metavar="LR", help="learning rate (default: 0.01)"
-    )
-    parser.add_argument(
-        "--momentum", type=float, default=0.5, metavar="M", help="SGD momentum (default: 0.5)"
-    )
-    parser.add_argument("--seed", type=int, default=1, metavar="S", help="random seed (default: 1)")
+    # Argumentos do modelo, mantemos como estavam
+    parser.add_argument("--latent_dim", type=int, default=120)
+    parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--epochs", type=int, default=10) # Para um teste rápido, pode diminuir para 2 ou 3
+    parser.add_argument("--num-classes", type=int, default=10)
+    parser.add_argument("--lr", type=float, default=0.01)
 
-    # Container environment
-    parser.add_argument("--hosts", type=list, default=json.loads(os.environ["SM_HOSTS"]))
-    parser.add_argument("--current-host", type=str, default=os.environ["SM_CURRENT_HOST"])
-    parser.add_argument("--model-dir", type=str, default=os.environ["SM_MODEL_DIR"])
-    parser.add_argument("--data-dir", type=str, default=os.environ["SM_CHANNEL_TRAINING"])
-    parser.add_argument("--num-gpus", type=int, default=os.environ["SM_NUM_GPUS"])
+    # Verificamos se estamos no ambiente SageMaker. Se não, usamos pastas locais.
+    if "SM_MODEL_DIR" in os.environ:
+        # Estamos na AWS, usamos as variáveis de ambiente
+        parser.add_argument("--model-dir", type=str, default=os.environ["SM_MODEL_DIR"])
+        parser.add_argument("--data-dir", type=str, default=os.environ["SM_CHANNEL_TRAINING"])
+        parser.add_argument("--num-gpus", type=int, default=os.environ["SM_NUM_GPUS"])
+    else:
+        # Não estamos na AWS (ex: GitHub Actions), usamos pastas locais padrão
+        parser.add_argument("--model-dir", type=str, default="model")
+        parser.add_argument("--data-dir", type=str, default="data")
+        parser.add_argument("--num-gpus", type=int, default=0) # GitHub Actions não tem GPU por padrão
 
-    train(parser.parse_args())
+    args = parser.parse_args()
+
+    # Criamos as pastas locais se elas não existirem
+    os.makedirs(args.model_dir, exist_ok=True)
+    os.makedirs(args.data_dir, exist_ok=True)
+    
+    # Chamamos a função de treino
+    train(args)
