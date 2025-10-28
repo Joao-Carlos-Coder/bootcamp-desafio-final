@@ -226,6 +226,7 @@ def _get_train_data_loader(batch_size, training_dir, **kwargs):
     dataset = datasets.MNIST(
         training_dir,
         train=True,
+        download=True,
         transform=transforms.ToTensor()
     )
 
