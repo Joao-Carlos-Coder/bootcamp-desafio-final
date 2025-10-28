@@ -36,7 +36,7 @@ jobs:
       # Passo 5: Executa o novo script para gerar a imagem
       # O caminho para o modelo é o nome do artefato seguido pelo caminho original.
       - name: Run image generation script
-        run: python generate_images.py --model-path model/model.pth
+        run: python generate_images.py --model-path model.pth
 
       # Passo 6: Salva a imagem gerada como um novo artefato
       - name: Upload generated image artifact
